@@ -24,3 +24,8 @@
 .sprite-corgi-stand-right {
     background: url('../sprites/corgi_stand_right.png');
 }
+
+.ball {
+    background: url('../sprites/smiley.png');
+    background-size: contain;
+}
