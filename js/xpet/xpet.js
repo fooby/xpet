@@ -152,7 +152,7 @@
 
         render: function() {
             var pos = this.calc_pos();
-            this.el.css({"left": pos.x, "top": pos.y});
+            this.el.css({x: pos.x + 'px', y: pos.y + 'px'});
         },
 
         set_animation: function(anim) {
