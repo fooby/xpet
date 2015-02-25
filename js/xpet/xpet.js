@@ -126,13 +126,41 @@
 (function() {
     var exports = XPET.namespace('sprite');
 
-    var ANIMATION_DEFAULTS = {
-        "sprite-corgi-walk-left": { width: 100, height: 100, frames: 4 },
-        "sprite-corgi-walk-right": { width: 100, height: 100, frames: 4 },
-        "sprite-corgi-stand-left":
-            { width: 100, height: 100, frames: 2, fps: 2 },
-        "sprite-corgi-stand-right":
-            { width: 100, height: 100, frames: 2, fps: 2 }
+    var ANIMATION_SETTINGS = {
+        "corgi-walk-left": {
+            css_class: "anim-corgi-walk",
+            frames: 4,
+            flip: true
+        },
+        "corgi-walk-right": {
+            css_class: "anim-corgi-walk",
+            frames: 4
+        },
+        "corgi-stand-left": {
+            css_class: "anim-corgi-stand",
+            frames: 2,
+            fps: 2,
+            flip: true
+        },
+        "corgi-stand-right": {
+            css_class: "anim-corgi-stand",
+            frames: 2,
+            fps: 2
+        },
+        "corgi-run-left": {
+            css_class: "anim-corgi-run",
+            frames: 2,
+            flip: true
+        },
+        "corgi-run-right": {
+            css_class: "anim-corgi-run",
+            frames: 2
+        },
+        "corgi-sit": {
+            css_class: "anim-corgi-sit",
+            frames: 4,
+            fps: 5
+        }
     };
 
     exports.Image = Class.extend({
@@ -147,11 +175,15 @@
 
         create: function() {
             this.el = jQuery('<div>', {
-                "class": this.css_class
+                "class": "sprite"
             }).css({
                 width: this.width,
                 height: this.height
             }).on('dragstart', function(ev) { ev.preventDefault(); });
+
+            this.sprite_el = jQuery('<div>', {
+                "class": this.css_class
+            }).appendTo(this.el);
         },
 
         calc_pos: function() {
@@ -182,16 +214,30 @@
 
         set_animation: function(anim) {
             if (this.anim === anim) { return; }
+
+            console.log("Switching anim from " + this.anim + " to " + anim);
+            this.anim = anim;
             if (this.motio) { this.motio.destroy(); }
 
-            this.el.removeClass();
-            this.el.addClass("sprite " + anim);
-            console.assert(anim in ANIMATION_DEFAULTS);
-            var defaults = ANIMATION_DEFAULTS[anim];
-            this.anim = anim;
-            this.motio = new Motio(this.el[0], _.defaults({
-                vertical: true
-            }, defaults));
+            console.assert(anim in ANIMATION_SETTINGS);
+            var settings = ANIMATION_SETTINGS[anim];
+
+            this.sprite_el.removeClass();
+            this.sprite_el.addClass(settings.css_class);
+            this.sprite_el.css("scaleX", settings.flip ? -1 : 1);
+
+            var motio_options = {
+                vertical: true,
+                width: this.width,
+                height: this.height,
+                fps: settings.fps || 15,
+                frames: settings.frames
+            };
+
+            console.log("Motio options! " + JSON.stringify(motio_options));
+
+
+            this.motio = new Motio(this.sprite_el[0], motio_options);
             this.motio.play();
         }
     });
@@ -253,9 +299,10 @@
         init: function(options) {
             this.pos = new Victor(options.x, options.y);
             this.velocity = new Victor(0, 0);
-            this.width = 100;
+            this.width = 140;
             this.height = 100;
             this.facing_right = true;
+            this.chasing = false;
 
             this.sprite = new sprite.Sprite({
                 width: this.width,
@@ -288,14 +335,16 @@
             this.pos.add({x: changeX, y: changeY});
 
             if (this.velocity.x > 1) {
-                this.sprite.set_animation("sprite-corgi-walk-right");
                 this.facing_right = true;
             } else if (this.velocity.x < -1) {
-                this.sprite.set_animation("sprite-corgi-walk-left");
                 this.facing_right = false;
+            }
+
+            if (this.chasing) {
+                this.sprite.set_animation(
+                    this.facing_right ? "corgi-walk-right" : "corgi-walk-left");
             } else {
-                this.sprite.set_animation(this.facing_right ?
-                    "sprite-corgi-stand-right": "sprite-corgi-stand-left");
+                this.sprite.set_animation("corgi-sit");
             }
 
             this.sprite.pos.x = this.pos.x;
@@ -571,14 +620,15 @@
                 var throw_time = this.game.now - target.throw_time;
 
                 var still_throwing = throw_time < 2000;
-                console.log("Throw time: "   + throw_time);
 
+                this.dog.chasing = false;
                 if (target.dragging) {
                     this.dog.stop();
                 } else if (!(still_throwing) && in_range) {
                     this.ball.physics_sleep();
                     this.dog.stop();
                 } else {
+                    this.dog.chasing = true;
                     this.dog.go_to_pos(target.pos, required_distance / 2);
                 }
 

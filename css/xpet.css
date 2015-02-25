@@ -7,22 +7,27 @@
 
 .sprite {
     position: absolute;
-    background-color: green;
 }
 
-.sprite-corgi-walk-left {
-    background: url('../sprites/corgi_walk_left.png');
+.sprite > div {
+    width: 100%;
+    height: 100%;
 }
 
-.sprite-corgi-walk-right {
-    background: url('../sprites/corgi_walk_right.png');
+.anim-corgi-walk {
+    background: url('../sprites/corgi_walk.png');
 }
 
-.sprite-corgi-stand-left {
-    background: url('../sprites/corgi_stand_left.png');
+.anim-corgi-run {
+    background: url('../sprites/corgi_run.png');
 }
-.sprite-corgi-stand-right {
-    background: url('../sprites/corgi_stand_right.png');
+
+.anim-corgi-stand {
+    background: url('../sprites/corgi_stand.png');
+}
+
+.anim-corgi-sit {
+    background: url('../sprites/corgi_sit.png');
 }
 
 .ball {
