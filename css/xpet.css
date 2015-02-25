@@ -1,0 +1,31 @@
+#gameworld {
+    border: 1px solid black;
+    width: 500px;
+    height: 500px;
+    position: relative;
+}
+
+.sprite {
+    position: absolute;
+    background-color: green;
+}
+
+.sprite-corgi-walk-left {
+    background: url('../sprites/corgi_walk_left.png');
+}
+
+.sprite-corgi-walk-right {
+    background: url('../sprites/corgi_walk_right.png');
+}
+
+.sprite-corgi-stand-left {
+    background: url('../sprites/corgi_stand_left.png');
+}
+.sprite-corgi-stand-right {
+    background: url('../sprites/corgi_stand_right.png');
+}
+
+.ball {
+    background: url('../sprites/smiley.png');
+    background-size: contain;
+}
