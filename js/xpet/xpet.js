@@ -1,5 +1,5 @@
 /* global XPET, Class, Victor, Motio, Matter */
-/* jshint forin: false */
+/* jshint forin: false, bitwise: false */
 
 // Namespace module
 // ---------------------------------------------------------------------------
@@ -114,7 +114,7 @@
 
         unregister_updatable: function(obj) {
             var id = obj.game_id;
-            delete this.renderables[obj.game_id];
+            delete this.renderables[id];
         }
     });
 
@@ -129,8 +129,10 @@
     var ANIMATION_DEFAULTS = {
         "sprite-corgi-walk-left": { width: 100, height: 100, frames: 4 },
         "sprite-corgi-walk-right": { width: 100, height: 100, frames: 4 },
-        "sprite-corgi-stand-left": { width: 100, height: 100, frames: 2, fps: 2 },
-        "sprite-corgi-stand-right": { width: 100, height: 100, frames: 2, fps: 2 }
+        "sprite-corgi-stand-left":
+            { width: 100, height: 100, frames: 2, fps: 2 },
+        "sprite-corgi-stand-right":
+            { width: 100, height: 100, frames: 2, fps: 2 }
     };
 
     exports.Image = Class.extend({
@@ -238,7 +240,6 @@
 // ---------------------------------------------------------------------------
 (function() {
     var exports = XPET.namespace('dog');
-    var pos = XPET.namespace('position');
     var sprite = XPET.namespace('sprite');
     var input = XPET.namespace('input');
 
@@ -252,7 +253,6 @@
         init: function(options) {
             this.pos = new Victor(options.x, options.y);
             this.velocity = new Victor(0, 0);
-            this.acceleration = new Victor(0, 0);
             this.width = 100;
             this.height = 100;
             this.facing_right = true;
@@ -265,7 +265,6 @@
 
         go_to_pos: function(dest, dist) {
             var speed = this.SPEED;
-
             if (this.pos.distanceSq(dest) < (dist * dist)) {
                 this.stop();
             } else {
@@ -304,7 +303,44 @@
         }
     });
 
-    var Ball = Class.extend({
+    /**
+     * Base class for entities represented by a single physics body
+     */
+    var PhysicsEntity = Class.extend({
+        init: function(options) {
+            this.physics_body = this.create_physics_body();
+
+            // Hack an XPET entity reference on here
+            this.physics_body.XPET = this;
+        },
+
+        create_physics_body: function() {
+            throw new Error("implement me");
+        },
+
+        physics_sleep: function() {
+            Matter.Sleeping.set(this.physics_body, true);
+        },
+
+        /**
+         * Called if the physics entity is dragged (this only happens if your
+         * body has a collisionFilter mask containing PHYSICS_MOUSE)
+         */
+        on_start_drag: function() {
+            this.dragging = true;
+        },
+
+        /**
+         * Called if the physics entity is dragged (this only happens if your
+         * body has a collisionFilter mask containing PHYSICS_MOUSE)
+         */
+        on_end_drag: function() {
+            this.dragging = false;
+            this.throw_time = this.game.now;
+        }
+    });
+
+    var Ball = PhysicsEntity.extend({
         init: function(options) {
             this.pos = new Victor(options.x, options.y);
             this.angle = 0;
@@ -320,7 +356,11 @@
                 css_class: "ball"
             });
 
-            this.physics_body = Matter.Bodies.circle(
+            this._super(options);
+        },
+
+        create_physics_body: function() {
+            return Matter.Bodies.circle(
                 this.pos.x, this.pos.y, this.diameter / 2, {
                     restitution: 0.8,
                     label: "Ball",
@@ -329,12 +369,10 @@
                         mask: PHYSICS_WALL | PHYSICS_MOUSE
                     }
                 });
-
-            this.physics_body.XPET = this;
         },
 
         update: function() {
-            // Read position from matter
+            // Read position from physics body
             this.pos.x = this.physics_body.position.x;
             this.pos.y = this.physics_body.position.y;
             this.angle = this.physics_body.angle;
@@ -342,10 +380,6 @@
             this.sprite.pos.x = this.pos.x;
             this.sprite.pos.y = this.pos.y;
             this.sprite.angle = this.angle;
-        },
-
-        physics_sleep: function() {
-            Matter.Sleeping.set(this.physics_body, true);
         },
 
         on_start_drag: function() {
@@ -570,6 +604,6 @@
     });
 
     exports.setup_dog = function(game) {
-        var dog = new DogGameLogic({game: game});
+        new DogGameLogic({game: game});
     };
 })();
