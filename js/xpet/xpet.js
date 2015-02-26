@@ -214,7 +214,6 @@
         set_animation: function(anim) {
             if (this.anim === anim) { return; }
 
-            console.log("Switching anim from " + this.anim + " to " + anim);
             this.anim = anim;
             if (this.motio) { this.motio.destroy(); }
 
@@ -232,9 +231,6 @@
                 fps: settings.fps || 15,
                 frames: settings.frames
             };
-
-            console.log("Motio options! " + JSON.stringify(motio_options));
-
 
             this.motio = new Motio(this.sprite_el[0], motio_options);
             this.motio.play();
