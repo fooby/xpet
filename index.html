@@ -7,15 +7,26 @@
     <script type="text/javascript" src="./js/motio.js"></script>
     <script type="text/javascript" src="./js/resig_inheritance.js"></script>
     <script type="text/javascript" src="./js/victor.js"></script>
+    <script type="text/javascript" src="./js/xpet/ns.js"></script>
     <script type="text/javascript" src="./js/xpet/xpet.js"></script>
     <link rel="stylesheet" type="text/css" href="./css/xpet.css">
+
+    <style type="text/css">
+        #gameworld {
+            width: 500px;
+            height: 500px;
+            border: 1px solid black;
+        }
+    </style>
   </head>
   <body>
     <div id="gameworld"></div>
 
     <script type="text/javascript">
         var game = XPET.require('main');
-        $(document).ready(game.start);
+        $(document).ready(function() {
+            game.start($('#gameworld'));
+        });
     </script>
 
   </body>

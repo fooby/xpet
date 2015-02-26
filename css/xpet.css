@@ -1,36 +1,33 @@
-#gameworld {
-    border: 1px solid black;
-    width: 500px;
-    height: 500px;
+.xpet-gameworld {
     position: relative;
 }
 
-.sprite {
+.xpet-sprite {
     position: absolute;
 }
 
-.sprite > div {
+.xpet-sprite > div {
     width: 100%;
     height: 100%;
 }
 
-.anim-corgi-walk {
+.xpet-anim-corgi-walk {
     background: url('../sprites/corgi_walk.png');
 }
 
-.anim-corgi-run {
+.xpet-anim-corgi-run {
     background: url('../sprites/corgi_run.png');
 }
 
-.anim-corgi-stand {
+.xpet-anim-corgi-stand {
     background: url('../sprites/corgi_stand.png');
 }
 
-.anim-corgi-sit {
+.xpet-anim-corgi-sit {
     background: url('../sprites/corgi_sit.png');
 }
 
-.ball {
+.xpet-ball {
     background: url('../sprites/smiley.png');
     background-size: contain;
 }

@@ -1,33 +1,31 @@
 /* global XPET, Class, Victor, Motio, Matter */
 /* jshint forin: false, bitwise: false */
 
-// Namespace module
-// ---------------------------------------------------------------------------
+
+// Initial checks, this is a module loading hack. The reason is that my
+// enviroment differs from the standard setting, so it needs to supply the data
+// via other means.
+//
+// By other means, I mean by hacking module references onto the XPET namespace.
 (function() {
-    var XPET = window.XPET = {};
+    console.assert(window.XPET !== undefined);
 
-    /**
-     * Namespace
-     */
-    XPET.namespace = function (namespace) {
-        var nsparts = namespace.split(".");
-        if (nsparts[0] === "XPET") { nsparts = nsparts.slice(1); }
-        var parent = XPET;
-        for (var i = 0; i < nsparts.length; i++) {
-            var partname = nsparts[i];
-            if (parent[partname] === undefined) { parent[partname] = {}; }
-            parent = parent[partname];
-        }
-        return parent;
-    };
+    // Detect underscore
+    if (!("underscore" in XPET) && _ && _.VERSION) { XPET.underscore = _; }
 
-    XPET.require = XPET.namespace;
+    // Detect class
+    if (!("Class" in XPET) && Class && Class.extend) { XPET.Class = Class; }
+
+    console.assert("underscore" in XPET);
+    console.assert("Class" in XPET); // Resig Class
+    console.assert(window.jQuery);
 })();
 
 // Game module
 // ---------------------------------------------------------------------------
 (function() {
     var exports = XPET.namespace('game');
+    var Class = XPET.require('Class');
 
     var timestamp = function() {
         return window.performance && window.performance.now ?
@@ -125,39 +123,40 @@
 // ---------------------------------------------------------------------------
 (function() {
     var exports = XPET.namespace('sprite');
+    var Class = XPET.require('Class');
 
     var ANIMATION_SETTINGS = {
         "corgi-walk-left": {
-            css_class: "anim-corgi-walk",
+            css_class: "xpet-anim-corgi-walk",
             frames: 4,
             flip: true
         },
         "corgi-walk-right": {
-            css_class: "anim-corgi-walk",
+            css_class: "xpet-anim-corgi-walk",
             frames: 4
         },
         "corgi-stand-left": {
-            css_class: "anim-corgi-stand",
+            css_class: "xpet-anim-corgi-stand",
             frames: 2,
             fps: 2,
             flip: true
         },
         "corgi-stand-right": {
-            css_class: "anim-corgi-stand",
+            css_class: "xpet-anim-corgi-stand",
             frames: 2,
             fps: 2
         },
         "corgi-run-left": {
-            css_class: "anim-corgi-run",
+            css_class: "xpet-anim-corgi-run",
             frames: 2,
             flip: true
         },
         "corgi-run-right": {
-            css_class: "anim-corgi-run",
+            css_class: "xpet-anim-corgi-run",
             frames: 2
         },
         "corgi-sit": {
-            css_class: "anim-corgi-sit",
+            css_class: "xpet-anim-corgi-sit",
             frames: 4,
             fps: 5
         }
@@ -175,7 +174,7 @@
 
         create: function() {
             this.el = jQuery('<div>', {
-                "class": "sprite"
+                "class": "xpet-sprite"
             }).css({
                 width: this.width,
                 height: this.height
@@ -272,10 +271,14 @@
     var xpet_game = XPET.require('game');
     var dog = XPET.require('dog');
 
-    exports.start = function() {
+    /**
+     * @param {jQuery.element} game_el      The game world element
+     */
+    exports.start = function(game_el) {
         var game = exports.game = new xpet_game.Game({
-            el: $("#gameworld")
+            el: jQuery(game_el)
         });
+        game_el.addClass('xpet-gameworld');
         dog.setup_dog(game);
         game.start();
     };
@@ -288,6 +291,8 @@
     var exports = XPET.namespace('dog');
     var sprite = XPET.namespace('sprite');
     var input = XPET.namespace('input');
+    var Class = XPET.require('Class');
+    var _ = XPET.require('underscore');
 
     var PHYSICS_MOUSE = 0x002;
     var PHYSICS_THROWABLE = 0x004;
@@ -402,7 +407,7 @@
             this.sprite = new sprite.Image({
                 width: this.diameter,
                 height: this.diameter,
-                css_class: "ball"
+                css_class: "xpet-ball"
             });
 
             this._super(options);
